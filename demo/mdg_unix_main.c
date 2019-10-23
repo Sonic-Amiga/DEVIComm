@@ -326,13 +326,14 @@ int main(int c, char**a) {
   if (c == 5) {
     // Server config from cmd-line args.
     configure_server(a[2], atoi(a[3]), a[4]);
+  } else {
+    // mdg_set_configuration(&mdg_configuration_test);
+    // mdg_set_configuration(&mdg_configuration_tmdg82);
+    // mdg_set_configuration(&mdg_configuration_localhost);
+    // mdg_set_configuration(&mdg_configuration_prod01);
+    mdg_set_configuration(&mdg_configuration_danfoss_prod);
+    // mdg_set_configuration(&mdg_configuration_danfoss_qa);
   }
-  // mdg_set_configuration(&mdg_configuration_test);
-  // mdg_set_configuration(&mdg_configuration_tmdg82);
-  // mdg_set_configuration(&mdg_configuration_localhost);
-  // mdg_set_configuration(&mdg_configuration_prod01);
-  // mdg_set_configuration(&mdg_configuration_danfoss_prod);
-  // mdg_set_configuration(&mdg_configuration_danfoss_qa);
 
   load_demo_email();
   if (client_email[0] == 0) {
