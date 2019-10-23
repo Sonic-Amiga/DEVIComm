@@ -30,6 +30,7 @@
 #else
 #include "mdg_util.h"
 #endif
+#include "logging.h"
 
 extern void mdg_chat_output_fprintf(const char *fmt, ...);
 extern void mdg_chat_client_exit();
@@ -753,12 +754,27 @@ static void remove_all_pairings_handler(char *args_buf, unsigned int len)
   mdg_chat_output_fprintf("mdg_revoke_all_pairings returned %d\n", s);
 }
 
+static int add_pairing(uint8_t *peer_id)
+{
+  int i;
+  load_all_pairings_from_file();
+  for (i = 0; i < chat_pairings_count; ++i) {
+    if (!memcmp(&chat_pairings[i].peer_id, peer_id, MDG_PEER_ID_SIZE)) {
+      return MDGSTORAGE_OK; // Existing pairing matched.
+    }
+  }
+  memcpy(&chat_pairings[chat_pairings_count].peer_id, peer_id, MDG_PEER_ID_SIZE);
+  chat_pairings_count++;
+  save_all_pairings_to_file();
+  return MDGSTORAGE_OK;
+}
+
 static void add_test_pairing_handler(char *args_buf, unsigned int len)
 {
   uint8_t peer_id[MDG_PEER_ID_SIZE];
   if (!arg_parse_device_public_key(&args_buf, &len, peer_id)) {
-    int s = mdgstorage_add_pairing(peer_id);
-    mdg_chat_output_fprintf("mdgstorage_add_pairing returned %d\n", s);
+    int s = add_pairing(peer_id);
+    mdg_chat_output_fprintf("add_pairing returned %d\n", s);
   }
 }
 
@@ -1322,6 +1338,8 @@ void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
 // Callbacks invoked by MDG lib.
 int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 {
+  Log("%s(%d, %s) called\n", __FUNCTION__, pairings_index, peer_id);
+
   load_all_pairings_from_file();
   if (pairings_index < chat_pairings_count) {
     memcpy(peer_id, chat_pairings[pairings_index].peer_id, MDG_PEER_ID_SIZE);
@@ -1333,22 +1351,15 @@ int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 // Callbacks invoked by MDG lib.
 int mdgstorage_add_pairing(uint8_t *peer_id)
 {
-  int i;
-  load_all_pairings_from_file();
-  for (i = 0; i < chat_pairings_count; ++i) {
-    if (!memcmp(&chat_pairings[i].peer_id, peer_id, MDG_PEER_ID_SIZE)) {
-      return MDGSTORAGE_OK; // Existing pairing matched.
-    }
-  }
-  memcpy(&chat_pairings[chat_pairings_count].peer_id, peer_id, MDG_PEER_ID_SIZE);
-  chat_pairings_count++;
-  save_all_pairings_to_file();
-  return MDGSTORAGE_OK;
+  Log("%s(%s) called\n", __FUNCTION__, peer_id);
+  return add_pairing(peer_id);
 }
 
 // Callbacks invoked by MDG lib.
 int mdgstorage_remove_pairing(unsigned char *peer_id)
 {
+  Log("%s(%s) called\n", __FUNCTION__, peer_id);
+ 
   int i = 0, j;
   load_all_pairings_from_file();
   while (i < chat_pairings_count) {
@@ -1401,6 +1412,8 @@ int32_t mdguser_incoming_call(const char *protocol)
 // Callbacks invoked by MDG lib.
 int mdgstorage_load_preset_pairing_token(char *printedLabelOtp)
 {
+  Log("%s() called\n", __FUNCTION__);
+
   if (preset_otp_buffer[0] != 0) {
     int otp_len = strlen(preset_otp_buffer);
     if (otp_len < MDG_PRESET_PAIR_ID_SIZE) {
@@ -1423,6 +1436,8 @@ int mdgstorage_load_preset_pairing_token(char *printedLabelOtp)
 // Callbacks invoked by MDG lib.
 int mdgstorage_load_license_key(void *license_key)
 {
+  Log("%s() called\n", __FUNCTION__);
+
   char *lk = (char*)license_key;
   int i;
   // Make the license key an (invalid) test sequence, for easy recognition.
@@ -1474,6 +1489,8 @@ static uint8_t chatclient_private_key[MDG_PRIVATE_KEY_DATA_SIZE];
 static uint8_t chatclient_private_key_set = 0;
 int mdgstorage_load_private_key(void *private_key)
 {
+  Log("%s() called\n", __FUNCTION__);
+
   if (!chatclient_private_key_set) {
     chatclient_load_or_create_private_key(chatclient_private_key);
   }

@@ -15,6 +15,7 @@
 #ifdef MDG_DYNAMIC_LIBRARY
 #include "mdg_callback_functions.h"
 #endif
+#include "logging.h"
 
 #ifdef MDG_ANDROID
 char mdg_chat_platform[] = "Android";
@@ -194,6 +195,8 @@ int mdg_demo_start(void)
 // Callback invoked by MDG lib.
 int mdgstorage_load_random_base(uint8_t *random_base, uint32_t length)
 {
+  Log("%s(%d) called\n", __FUNCTION__, length);
+
   /* Library uses /dev/urandom internally on unix. */
   return 0;
 }
