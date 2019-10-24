@@ -1437,14 +1437,7 @@ int mdgstorage_load_preset_pairing_token(char *printedLabelOtp)
 int mdgstorage_load_license_key(void *license_key)
 {
   Log("%s() called\n", __FUNCTION__);
-
-  char *lk = (char*)license_key;
-  int i;
-  // Make the license key an (invalid) test sequence, for easy recognition.
-  for (i = 0; i < MDG_LICENSEKEY_SIZE; i++) {
-    lk[i] = i;
-  }
-  return 0;
+  return 1;
 }
 
 // Load/create+store private key for this instance in local filesystem.

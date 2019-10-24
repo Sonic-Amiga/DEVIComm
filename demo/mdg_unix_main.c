@@ -162,12 +162,44 @@ void mdg_abort() {
   abort();
 }
 
+#ifdef DEVISMART_API
 
+/*
+ * Undocumented function, present in DEVISmart version of the library.
+ */
+_MDG_API_ int32_t mdg_add_to_buffer_pool(void *memory, uint32_t memorySize, uint32_t singleBufferSize);
+
+#endif
 
 extern void mdg_chat_init();
 int mdg_demo_start(void)
 {
   int s;
+  
+#ifdef DEVISMART_API
+  /*
+   * If this is not done, mdg_init() fails with code -3. The code inside the
+   * library makes sure that at least 5 buffers are available.
+   * Values and algorithm have been reverse engineered from Java and JNI glue
+   * layer code. Each buffer has some header internally, 76 likely represents
+   * extra space in order to accomodate it.
+   */
+  const int numBuffers = 128;
+  const int bufferSize = 1536;
+  
+  int rawBufferSize = bufferSize + 76;
+  int totalSize = numBuffers * rawBufferSize;
+  void *mem = malloc(totalSize);
+
+  if (!mem) {
+	fprintf(stderr, "Failed to allocate memory for buffers\n");
+	return -1;
+  }
+  
+  /* According to the code it always returns zero, so it's OK to ignore the result */
+  mdg_add_to_buffer_pool(mem, totalSize, rawBufferSize);
+#endif
+  
   if ((s = mdg_init(0)) != 0) {
     fprintf(stderr, "mdg_init failed with %d\n", s);
     return -1;
