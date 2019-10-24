@@ -1338,7 +1338,7 @@ void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
 // Callbacks invoked by MDG lib.
 int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 {
-  Log("%s(%d, %s) called\n", __FUNCTION__, pairings_index, peer_id);
+  Log("%s(%d) called\n", __FUNCTION__, pairings_index);
 
   load_all_pairings_from_file();
   if (pairings_index < chat_pairings_count) {
