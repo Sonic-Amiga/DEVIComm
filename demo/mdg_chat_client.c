@@ -1370,14 +1370,14 @@ int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 // Callbacks invoked by MDG lib.
 int mdgstorage_add_pairing(uint8_t *peer_id)
 {
-  Log("%s(%s) called\n", __FUNCTION__, peer_id);
+  Log("%s(", __FUNCTION__); Hexdump(peer_id, MDG_PEER_ID_SIZE); Log(") called\n");
   return add_pairing(peer_id);
 }
 
 // Callbacks invoked by MDG lib.
 int mdgstorage_remove_pairing(unsigned char *peer_id)
 {
-  Log("%s(%s) called\n", __FUNCTION__, peer_id);
+  Log("%s(", __FUNCTION__); Hexdump(peer_id, MDG_PEER_ID_SIZE); Log(") called\n");
  
   int i = 0, j;
   load_all_pairings_from_file();
