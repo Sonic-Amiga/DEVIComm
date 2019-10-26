@@ -174,9 +174,16 @@ _MDG_API_ int32_t mdg_close_peer_connection(uint32_t connection_id);
 extern int32_t mdguser_incoming_call(const char *protocol);
 typedef int32_t (*mdg_peer_verifying_cb)(const char *protocol, const mdg_peer_id_t device_id);
 _MDG_API_ void mdg_set_peer_verifying_cb(mdg_peer_verifying_cb cb);
+#ifdef DEVISMART_API
+_MDG_API_ int32_t mdg_get_connection_info(uint32_t connection_id,
+                                          mdg_peer_id_t sender_device_id,
+                                          char protocol[MAX_PROTOCOL_BYTES],
+										  mdg_peer_id_t unknown);
+#else
 _MDG_API_ int32_t mdg_get_connection_info(uint32_t connection_id,
                                           mdg_peer_id_t sender_device_id,
                                           char protocol[MAX_PROTOCOL_BYTES]);
+#endif
 _MDG_API_ int32_t mdg_enable_remote_logging(uint32_t duration);
 _MDG_API_ int32_t mdg_set_debug_log_target(int32_t target);
 _MDG_API_ int32_t mdg_start_local_listener(uint16_t *port);

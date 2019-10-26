@@ -37,9 +37,10 @@
 #else
 #include "mdg_util.h"
 #endif
+#include "devismart.h"
 #include "logging.h"
+#include "mdg_chat_client.h"
 
-extern void mdg_chat_output_fprintf(const char *fmt, ...);
 extern void mdg_chat_client_exit();
 
 typedef struct {
@@ -126,6 +127,19 @@ static void load_all_pairings_from_file()
 
 char client_email[256];
 extern char mdg_chat_platform[];
+
+/* Compatibility wrapper for API version, used by DEVISmart. */
+static int get_connection_info(uint32_t connection_id,
+                               mdg_peer_id_t sender_device_id,
+                               char protocol[MAX_PROTOCOL_BYTES])
+{
+#ifdef DEVISMART_API
+    /* Meaning of this extra parameter was never understood, returned ID always contains zeroes */
+    return mdg_get_connection_info(connection_id, sender_device_id, protocol, NULL);
+#else
+    return mdg_get_connection_info(connection_id, sender_device_id, protocol);
+#endif
+}											  
 
 mdg_property_t chatclient_client_props[] = {
   // Example properties. Make up your own for your application.
@@ -529,17 +543,23 @@ static void close_conn_handler(char *args_buf, unsigned int len)
   }
 }
 
-
 static void conninfo_handler(char *args_buf, unsigned int len)
 {
   int conn_id, s;
   uint8_t sender_device_id[MDG_PEER_ID_SIZE];
   char protocol[MAX_PROTOCOL_BYTES];
+#ifdef DEVISMART_API
+  uint8_t unknown_id[MDG_PEER_ID_SIZE];
+#endif
 
   if (!set_intparam_handler(&args_buf, &len, "connection_id",
                             &conn_id,
                             -1, 1000)) {
+#ifdef DEVISMART_API
+    s = mdg_get_connection_info(conn_id, sender_device_id, protocol, unknown_id);
+#else
     s = mdg_get_connection_info(conn_id, sender_device_id, protocol);
+#endif
     if (s != 0) {
       mdg_chat_output_fprintf("mdg_get_connection_info failed, returned %d\n", s);
     } else {
@@ -547,6 +567,10 @@ static void conninfo_handler(char *args_buf, unsigned int len)
       hex_encode_bytes(sender_device_id, hexed, MDG_PEER_ID_SIZE);
       mdg_chat_output_fprintf("Peer for connection #%d is %s\n", conn_id, hexed);
       mdg_chat_output_fprintf("Peer protocol for connection #%d is %s\n", conn_id, protocol);
+#ifdef DEVISMART_API
+      hex_encode_bytes(unknown_id, hexed, MDG_PEER_ID_SIZE);
+      mdg_chat_output_fprintf("Extra id for connection #%d is %s\n", conn_id, hexed);
+#endif
     }
   }
 }
@@ -1302,10 +1326,12 @@ static void chatclient_data_received(const uint8_t *data, const uint32_t count, 
   char protocol[MAX_PROTOCOL_BYTES];
   int s;
 
-  s = mdg_get_connection_info(connection_id, sender_device_id, protocol);
+  s = get_connection_info(connection_id, sender_device_id, protocol);
   if (s == 0) {
     if (!memcmp(PROTOCOL_BOOTSTRAP, protocol, MAX_PROTOCOL_BYTES)) {
       s = bootstrap_server_got_data(data, count);
+	} else if (!strcmp(PROTOCOL_DEVISMART_CONFIG, protocol)) {
+	  s = devismart_receive_config_data(data, count);
     } else {
       s = chatclient_print_data_received(data, count, connection_id);
     }
@@ -1321,7 +1347,6 @@ static void chatclient_data_received(const uint8_t *data, const uint32_t count, 
     mdg_close_peer_connection(connection_id);
   }
 }
-
 
 // Callbacks invoked by MDG lib.
 void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
@@ -1351,6 +1376,13 @@ void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
     if (mdg_receive_from_peer(connection_id, chatclient_data_received)) {
       mdg_chat_output_fprintf("mdg_receive_from_peer failed\n");
     }
+	
+    char protocol[MAX_PROTOCOL_BYTES];
+	int s = get_connection_info(connection_id, NULL, protocol);
+	if (s == 0) {
+	  if (!strcmp(protocol, PROTOCOL_DEVISMART_CONFIG))
+	    devismart_request_configuration(connection_id);
+	}
   }
 }
 
@@ -1499,14 +1531,22 @@ static void chatclient_load_or_create_private_key(uint8_t *pk)
 
 static uint8_t chatclient_private_key[MDG_PRIVATE_KEY_DATA_SIZE];
 static uint8_t chatclient_private_key_set = 0;
+
+uint8_t *chatclient_get_private_key(void)
+{
+  if (!chatclient_private_key_set) {
+    chatclient_load_or_create_private_key(chatclient_private_key);
+	chatclient_private_key_set = 1;
+  }
+  
+  return chatclient_private_key;
+}
+
 int mdgstorage_load_private_key(void *private_key)
 {
   Log("%s() called\n", __FUNCTION__);
 
-  if (!chatclient_private_key_set) {
-    chatclient_load_or_create_private_key(chatclient_private_key);
-  }
-  memcpy(private_key, chatclient_private_key, MDG_PRIVATE_KEY_DATA_SIZE);
+  memcpy(private_key, chatclient_get_private_key(), MDG_PRIVATE_KEY_DATA_SIZE);
   return 0;
 }
 
