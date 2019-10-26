@@ -45,6 +45,7 @@ extern void mdg_chat_client_exit();
 
 typedef struct {
   uint8_t peer_id[MDG_PEER_ID_SIZE];
+  char peer_name[256];
 } pairing_t;
 
 #define MAX_CHAT_PAIRINGS 32
@@ -770,7 +771,7 @@ static void list_pairings_handler(char *args_buf, unsigned int len)
   mdg_chat_output_fprintf("Listing pairings. Count=%d\n", chat_pairings_count);
   for (i = 0; i < chat_pairings_count; i++) {
     hex_encode_bytes(chat_pairings[i].peer_id, hexed, MDG_PEER_ID_SIZE);
-    mdg_chat_output_fprintf("%s\n", hexed);
+    mdg_chat_output_fprintf("%s %s\n", hexed, chat_pairings[i].peer_name);
   }
 }
 
@@ -797,7 +798,7 @@ static void remove_all_pairings_handler(char *args_buf, unsigned int len)
 #endif
 }
 
-static int add_pairing(uint8_t *peer_id)
+int add_pairing(uint8_t *peer_id, const char *peer_name)
 {
   int i;
   load_all_pairings_from_file();
@@ -807,6 +808,8 @@ static int add_pairing(uint8_t *peer_id)
     }
   }
   memcpy(&chat_pairings[chat_pairings_count].peer_id, peer_id, MDG_PEER_ID_SIZE);
+  strncpy(chat_pairings[chat_pairings_count].peer_name, peer_name,
+          sizeof(chat_pairings[chat_pairings_count].peer_name) - 1);
   chat_pairings_count++;
   save_all_pairings_to_file();
   return MDGSTORAGE_OK;
@@ -816,7 +819,7 @@ static void add_test_pairing_handler(char *args_buf, unsigned int len)
 {
   uint8_t peer_id[MDG_PEER_ID_SIZE];
   if (!arg_parse_device_public_key(&args_buf, &len, peer_id)) {
-    int s = add_pairing(peer_id);
+    int s = add_pairing(peer_id, "Manually added");
     mdg_chat_output_fprintf("add_pairing returned %d\n", s);
   }
 }
@@ -1403,7 +1406,7 @@ int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 int mdgstorage_add_pairing(uint8_t *peer_id)
 {
   Log("%s(", __FUNCTION__); Hexdump(peer_id, MDG_PEER_ID_SIZE); Log(") called\n");
-  return add_pairing(peer_id);
+  return add_pairing(peer_id, "Paired by MDG");
 }
 
 // Callbacks invoked by MDG lib.
