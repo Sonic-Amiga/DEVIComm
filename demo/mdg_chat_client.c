@@ -54,7 +54,7 @@ static int chat_pairings_count = 0;
 
 static int pcr_timeout = 10;
 static int incomingcall_testdelay = 0;
-static int hex_output_mode = 0;
+static int hex_output_mode = 1;
 static int ap_mode = 0;
 
 struct cmd {
@@ -208,16 +208,23 @@ static void quit_handler(char *args_buf, unsigned int len)
   mdg_chat_client_exit();
 }
 
-static void whoami_handler(char *args_buf, unsigned int len)
+void whoami_hex(char *hexed)
 {
   mdg_peer_id_t device_id;
-  char hexed[128];
+
   if (mdg_whoami(&device_id) != 0) {
     mdg_chat_output_fprintf("whoami failed.\n");
     return;
   }
 
   hex_encode_bytes(device_id, hexed, MDG_PRIVATE_KEY_DATA_SIZE);
+}
+
+static void whoami_handler(char *args_buf, unsigned int len)
+{
+  char hexed[AS_HEX(MDG_PEER_ID_SIZE)];
+
+  whoami_hex(hexed);
   mdg_chat_output_fprintf("whoami says %s\n", hexed);
 }
 
@@ -966,7 +973,7 @@ static void place_call_remote_handler(char *args_buf, unsigned int len)
         return;
       }
   } else {
-    protocol_arg = "chat-client";
+    protocol_arg = PROTOCOL_DEVISMART_THERMOSTAT;
   }
 
   s = mdg_place_call_remote(device_id, protocol_arg, &connection_id, pcr_timeout);

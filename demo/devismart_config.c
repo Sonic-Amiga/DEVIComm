@@ -31,20 +31,15 @@ static char *jsonstrdup(const char *json, jsmntok_t *tok)
  */
 static const char *user_name = "DEVIComm test";
 
-static void getMyIdHexed(char *hexed)
-{
-  hex_encode_bytes(chatclient_get_private_key(), hexed, MDG_PEER_ID_SIZE);
-}
-
 void devismart_request_configuration(uint32_t connection_id)
 {
-  char hexed[2 * MDG_PEER_ID_SIZE + 1];
+  char hexed[AS_HEX(MDG_PEER_ID_SIZE)];
   char json[1024];
   int len, s;
   
   Log("Requesting DEVISmart config on connection %d\n", connection_id);
 
-  getMyIdHexed(hexed);
+  whoami_hex(hexed);
   /*
    * If chunkedMessage parameter is set to true, the whole data will be split
    * into 512-byte long chunks and sent as separate packets; we would have
