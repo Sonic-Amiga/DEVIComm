@@ -19,7 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\devismart_config.c" />
     <ClCompile Include="..\mdg_chat_client.c" />
+    <ClInclude Include="..\devismart.h" />
+    <ClInclude Include="..\jsmn.h" />
+    <ClInclude Include="..\logging.h" />
+    <ClInclude Include="..\mdg_chat_client.h" />
     <ClInclude Include="..\mdg_config.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <FileType>CppCode</FileType>

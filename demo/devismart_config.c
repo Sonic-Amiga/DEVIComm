@@ -19,7 +19,13 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 
 static char *jsonstrdup(const char *json, jsmntok_t *tok)
 {
-  return strndup(json + tok->start, tok->end - tok->start);
+  /* Reinvent strndup(); Windows doesn't have it. */
+  int len = tok->end - tok->start;
+  char *str = malloc(len + 1);
+
+  memcpy(str, json + tok->start, len);
+  str[len] = 0;
+  return str;
 }
 
 /*
