@@ -1,4 +1,4 @@
-SRCFILES := mdg_unix_main.c mdg_chat_client.c devismart_config.c
+SRCFILES := mdg_unix_main.c mdg_chat_client.c devismart_config.c devismart.c
 
 SRC := $(addprefix $(SRCDIR)/,$(SRCFILES))
 

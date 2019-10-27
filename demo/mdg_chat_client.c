@@ -1285,6 +1285,22 @@ void mdg_chat_client_input(char *in_buf, unsigned int len)
 }
 
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
+void chatclient_hexdump(const uint8_t *data, uint32_t count)
+{
+  char buf[512];
+  int bytes_left;
+
+  for (bytes_left = count; bytes_left > 0; ) {
+    int bytes_now = MIN(bytes_left, 512/2);
+
+    hex_encode_bytes(data, buf, bytes_now);
+    mdg_chat_output_fprintf("%.*s", bytes_now * 2, buf);
+    bytes_left -= bytes_now;
+    data += bytes_now;
+  }
+  mdg_chat_output_fprintf("\n");
+}
+
 static int chatclient_print_data_received(const uint8_t *data,
                                            const uint32_t count,
                                            const uint32_t connection_id)
@@ -1306,19 +1322,10 @@ static int chatclient_print_data_received(const uint8_t *data,
   } break;
 
   case 1: {
-    char buf[512];
     mdg_chat_output_fprintf("Received data from peer on connection %d, "
                             "count=%u, hexbytes: ",
                             connection_id, count);
-    int bytes_left;
-    for (bytes_left = count; bytes_left > 0; ) {
-      int bytes_now = MIN(bytes_left, 512/2);
-      hex_encode_bytes(data, buf, bytes_now);
-      mdg_chat_output_fprintf("%.*s", bytes_now * 2, buf);
-      bytes_left -= bytes_now;
-      data += bytes_now;
-    }
-    mdg_chat_output_fprintf("\n");
+    chatclient_hexdump(data, count);
   } break;
 
   case 0:
@@ -1342,6 +1349,8 @@ static void chatclient_data_received(const uint8_t *data, const uint32_t count, 
       s = bootstrap_server_got_data(data, count);
 	} else if (!strcmp(PROTOCOL_DEVISMART_CONFIG, protocol)) {
 	  s = devismart_receive_config_data(data, count);
+	} else if (!strcmp(PROTOCOL_DEVISMART_THERMOSTAT, protocol)) {
+	  s = devismart_receive_data(data, count, connection_id);
     } else {
       s = chatclient_print_data_received(data, count, connection_id);
     }
@@ -1392,6 +1401,8 @@ void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
 	if (s == 0) {
 	  if (!strcmp(protocol, PROTOCOL_DEVISMART_CONFIG))
 	    devismart_request_configuration(connection_id);
+	  else if (!strcmp(protocol, PROTOCOL_DEVISMART_THERMOSTAT))
+		devismart_connection_begin(connection_id);
 	}
   }
 }
