@@ -38,6 +38,7 @@
 #include "mdg_util.h"
 #endif
 #include "devismart.h"
+#include "devismart_protocol.h"
 #include "logging.h"
 #include "mdg_chat_client.h"
 
@@ -973,7 +974,7 @@ static void place_call_remote_handler(char *args_buf, unsigned int len)
         return;
       }
   } else {
-    protocol_arg = PROTOCOL_DEVISMART_THERMOSTAT;
+    protocol_arg = DEVISMART_PROTOCOL_NAME;
   }
 
   s = mdg_place_call_remote(device_id, protocol_arg, &connection_id, pcr_timeout);
@@ -1032,8 +1033,12 @@ static void place_call_local_handler(char *args_buf, unsigned int len)
     return;
   }
 
-  if (set_intparam_handler(&args_buf, &len, "port", &port, 1, 0xffff) != 0) {
-    return;
+  if (len > 0) {
+    if (set_intparam_handler(&args_buf, &len, "port", &port, 1, 0xffff) != 0) {
+      return;
+	}
+  } else {
+	port = DEVISMART_LOCAL_PORT;
   }
 
   if (len > 0) {
@@ -1349,7 +1354,7 @@ static void chatclient_data_received(const uint8_t *data, const uint32_t count, 
       s = bootstrap_server_got_data(data, count);
 	} else if (!strcmp(PROTOCOL_DEVISMART_CONFIG, protocol)) {
 	  s = devismart_receive_config_data(data, count);
-	} else if (!strcmp(PROTOCOL_DEVISMART_THERMOSTAT, protocol)) {
+	} else if (!strcmp(DEVISMART_PROTOCOL_NAME, protocol)) {
 	  s = devismart_receive_data(data, count, connection_id);
     } else {
       s = chatclient_print_data_received(data, count, connection_id);
@@ -1401,7 +1406,7 @@ void mdguser_routing(uint32_t connection_id, mdg_routing_status_t state)
 	if (s == 0) {
 	  if (!strcmp(protocol, PROTOCOL_DEVISMART_CONFIG))
 	    devismart_request_configuration(connection_id);
-	  else if (!strcmp(protocol, PROTOCOL_DEVISMART_THERMOSTAT))
+	  else if (!strcmp(protocol, DEVISMART_PROTOCOL_NAME))
 		devismart_connection_begin(connection_id);
 	}
   }

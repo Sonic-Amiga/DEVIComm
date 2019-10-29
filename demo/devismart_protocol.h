@@ -1,6 +1,12 @@
 #ifndef _DEVISMART_PROTOCOL_H
 #define _DEVISMART_PROTOCOL_H
 
+/* Port for local connections */
+#define DEVISMART_LOCAL_PORT 14641
+
+/* MDG protocol name */
+#define DEVISMART_PROTOCOL_NAME "dominion-1.0"
+
 /*
  * Constant names are shamelessly ripped from DEVISmart APK. Thanks Java for cooperation! :)
  */
