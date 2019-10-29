@@ -12,12 +12,14 @@
  */
 
 /* Every message starts with this header */
-struct __attribute__((packed)) MsgHeader
+#pragma pack(1)
+struct MsgHeader
 {
   uint8_t  msgClass; // Message class, see below
   uint16_t msgCode;  // Message code, see below
   uint8_t  dataSize; // Payload size, does not include header itself
 };
+#pragma pack()
 
 /*
  * Message class. Codes (defined below) appear only under their class,

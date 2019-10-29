@@ -15,6 +15,8 @@
 
 char mdg_chat_platform[] = "Windows";
 
+#include "mdg_config.c"
+
 extern void hex_encode_bytes(const uint8_t *input, char *dst, int input_size);
 extern int hex_decode_bytes(char *input, uint8_t *dst, int output_size);
 extern void chatclient_parse_cmd_args(int c, char**a);
@@ -186,6 +188,7 @@ int mdg_demo_start(void)
   // If you need custom configuration, now is the time:
   // mdg_set_configuration(&mdg_configuration_test);
   // mdg_set_configuration(&mdg_configuration_prod01);
+  mdg_set_configuration(&mdg_configuration_danfoss_prod);
 
   if ((s = mdg_init(0)) != 0) {
     fprintf(stderr, "mdg_init failed with %d\n", s);
