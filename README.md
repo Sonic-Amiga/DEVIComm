@@ -13,6 +13,12 @@ purposes only. Using it in a produce requires a license. Original description
 from original authors is preserved in README-original.md file, please refer for
 more information.
 
+I, the author of changes to original Trifork demo code, have no affitiations
+with either Trifork or Danfoss companies. This work is being done in my private
+time on behalf of my own purely for evaluation and research purposes. No
+commercial interests are being (or will be) pursued. My contact email is
+pavel_fedin@mail.ru.
+
 ## How to use
 
 1. Build and run the demo application.
