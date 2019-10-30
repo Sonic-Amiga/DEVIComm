@@ -19,8 +19,10 @@
 
 #define SECURE_LOG_MODULE_NO 117
 
+#ifndef __ANDROID__
 // Include demo of file downloading - links mdgext_filedown into the binary too.
 #define DEMO_FILE_DOWNLOAD
+#endif
 
 #ifdef MDG_DYNAMIC_LIBRARY
 // Hex encode / decode:

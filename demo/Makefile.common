@@ -1,0 +1,11 @@
+SRCFILES := mdg_unix_main.c mdg_chat_client.c
+
+SRC := $(addprefix $(SRCDIR)/,$(SRCFILES))
+
+default: $(BIN)
+
+$(BIN): $(SRC) $(SO_FILES)
+	$(CC) -o $@ $(CFLAGS) $(SRC) $(LDFLAGS)
+
+clean:
+	rm -f $(BIN)

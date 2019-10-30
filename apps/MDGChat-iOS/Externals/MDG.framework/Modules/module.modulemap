@@ -1,6 +1,0 @@
-framework module MDG {
-  umbrella header "MDG.h"
-
-  export *
-  module * { export * }
-}
