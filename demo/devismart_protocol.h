@@ -38,6 +38,19 @@ enum MsgClass
   DOMINION_LOGS      = 8
 };
 
+/*
+ * Message codes. "Len" field specifies actual length of the field, received from
+ * the device. For strings and arrays the data has a fixed length with unused portion
+ * in the end.
+ * This is probably a result of keeping device's firmware as small and simple as possible.
+ * It looks like the device has fixed amount of memory space to store its state and
+ * configuration items.
+ * Consequently, it's not a good idea to send messages longer than specified here. It can
+ * cause buffer overflow, damaging the configuration, crashing and potentionally bricking
+ * the thermostat.
+ * Array and String types are prefixed with length. Yes, again. But this is actual length,
+ * while Len field of the message may specify the whole field.
+ */
 enum MsgCode
 {                                                     /* Len Payload type Meaning */
   /* Class DEVICEGLOBAL */
@@ -108,6 +121,7 @@ enum MsgCode
   WIFI_DISCONNECT_COUNT                      = 29802, /* 2   uint16_t    Count of network outages ? For what period ? 0 on my device */ 
   WIFI_SKIP_AP_MODE                          = 29803, /* 1   Boolean ?   ??? */
   WIFI_UPDATE_CONNECTED_STRENGTH             = 29805, /* 1   uint8_t     Perhaps used as a command ? */
+  /* Class MDG */
   MDG_ERROR_CODE                             = 1010,  /* 2   uint16_t    Error code from MDG. Cloud connection perhaps ? */
   MDG_CONNECTED_TO_SERVER                    = 29825, /* 1   Boolean     MDG cloud connection presence */
   MDG_SHOULD_CONNECT                         = 29826, /* 1   Boolean ?   Disables cloud operation ??? */
@@ -185,12 +199,14 @@ enum MsgCode
   MDG_PAIRING_NOTIFICATION_SUBSCRIPTIONS     = 30475,
   MDG_PAIRING_DESCRIPTION = 30496,
   MDG_PAIRING_TYPE = 30497,
-  MDG_CONFIRM_SYSTEM_WIZARD_INFO = 30498,
+  MDG_CONFIRM_SYSTEM_WIZARD_INFO             = 30498,
+  /* Class SOFTWAREUPDATE */
   SOFTWAREUPDATE_ERROR_CODE = 1011,
   SOFTWAREUPDATE_DOWNLOAD_PUSHED_UPDATE = 30593,
   SOFTWAREUPDATE_CHECK_FOR_UPDATE = 30594,
   SOFTWAREUPDATE_INSTALLATION_STATE = 30595,
   SOFTWAREUPDATE_INSTALLATION_PROGRESS = 30596,
+  /* Class DOMINION_SYSTEM */
   SYSTEM_RUNTIME_INFO_RELAY_COUNT = 29232,
   SYSTEM_RUNTIME_INFO_RELAY_ON_TIME = 29233,
   SYSTEM_RUNTIME_INFO_SYSTEM_RUNTIME = 29234,
@@ -235,12 +251,14 @@ enum MsgCode
   SYSTEM_MDG_CONNECT_ERROR = 29273,
   SYSTEM_MDG_LOG_UNTIL = 29274,
   NVM_SYSTEM_PEAK_GRADIENT = 29275,
+  /* Class DOMINION_HEATING */
   HEATING_TEMPERATURE_TOP = 29296,
   HEATING_TEMPERATURE_BOTTOM = 29297,
   HEATING_TEMPERATURE_FLOOR = 29298,
   HEATING_TEMPERATURE_ROOM = 29299,
   HEATING_LOW_TEMPERATURE_WARNING = 29300,
   HEATING_LOW_TEMPERATURE_WARNING_THRESHOLD = 29301,
+  /* Class DOMINION_SCHEDULER */
   SCHEDULER_CONTROL_INFO = 29328,
   SCHEDULER_CONTROL_MODE = 29329,
   SCHEDULER_SETPOINT_COMFORT = 29330,
@@ -256,6 +274,7 @@ enum MsgCode
   SCHEDULER_AWAY = 29340,
   SCHEDULER_WEEK = 29341,
   SCHEDULER_WEEK_2 = 29342,
+  /* Class DOMINION_LOGS */
   LOG_RESET = 29376,
   LOG_ENERGY_CONSUMPTION_TOTAL = 29377,
   LOG_ENERGY_CONSUMPTION_30DAYS = 29378,
@@ -268,5 +287,7 @@ struct Version
   uint8_t minor;
   uint8_t major;
 };
+
+/* TODO: Describe format of datestamps and interpretation of temperature values */
 
 #endif

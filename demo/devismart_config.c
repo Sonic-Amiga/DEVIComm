@@ -87,10 +87,9 @@ uint32_t devismart_receive_config_data(const uint8_t *data, uint32_t size)
   Log("Received configuration data:\n%.*s\n", size, data);  
 
 /*
- * TODO: Parse this JSON and add peers
-  {"houseName":"My Flat","houseEditUsers":true,"rooms":[{"roomName":"Гостиная","peerId":"<undisclosed>","zone":"Living","sortOrder":0}]}
-*/
-
+ * Received data is a JSON and it looks like this (i've removed my peer ID):
+ * {"houseName":"My Flat","houseEditUsers":true,"rooms":[{"roomName":"Living room","peerId":"<undisclosed>","zone":"Living","sortOrder":0}]}
+ */
   jsmn_parser p;
   jsmntok_t t[1024];
   int r, i, j, k;
