@@ -19,9 +19,16 @@
 
 #define SECURE_LOG_MODULE_NO 117
 
+#ifdef MDG_WINDOWS
+#define MDGEXT_NO_CLIENT_DEBUG
+#define MDGEXT_NO_INVOKE_SERVICE
+#define MDGEXT_NO_SECURE_LOG
+#define MDGEXT_NO_SERVER_PUSH
+#else
 #ifndef __ANDROID__
 // Include demo of file downloading - links mdgext_filedown into the binary too.
 #define DEMO_FILE_DOWNLOAD
+#endif
 #endif
 
 #ifdef MDG_DYNAMIC_LIBRARY
@@ -580,6 +587,9 @@ static void send_handler(char *args_buf, unsigned int len)
 
 static void send_append_handler(char *args_buf, unsigned int len)
 {
+#ifdef MDG_WINDOWS
+    mdg_chat_output_fprintf("Not supported under Windows\n");
+#else
   int conn_id, flush_now, s;
   char *message;
 
@@ -599,6 +609,7 @@ static void send_append_handler(char *args_buf, unsigned int len)
       }
     }
   }
+#endif
 }
 
 static void send_hex_handler(char *args_buf, unsigned int len)
@@ -626,6 +637,9 @@ static void send_hex_handler(char *args_buf, unsigned int len)
 
 static void send_hex_append_handler(char *args_buf, unsigned int len)
 {
+#ifdef MDG_WINDOWS
+    mdg_chat_output_fprintf("Not supported under Windows\n");
+#else
   int conn_id, flush_now, s;
   uint8_t data[512]; // Be carefull with large chunks on stack.
 
@@ -648,6 +662,7 @@ static void send_hex_append_handler(char *args_buf, unsigned int len)
       }
     }
   }
+#endif
 }
 
 static void pretty_print_otp(const char *format, const char *otp)
@@ -750,8 +765,12 @@ static void remove_pairing_handler(char *args_buf, unsigned int len)
 
 static void remove_all_pairings_handler(char *args_buf, unsigned int len)
 {
+#ifdef MDG_WINDOWS
+  mdg_chat_output_fprintf("Not supported under Windows\n");
+#else
   int s = mdg_revoke_all_pairings();
   mdg_chat_output_fprintf("mdg_revoke_all_pairings returned %d\n", s);
+#endif
 }
 
 static int add_pairing(uint8_t *peer_id)
