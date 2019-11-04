@@ -16,6 +16,7 @@
 #include "mdg_callback_functions.h"
 #endif
 #include "logging.h"
+#include "pktdump.h"
 
 #ifdef MDG_ANDROID
 char mdg_chat_platform[] = "Android";
@@ -334,6 +335,7 @@ static void setup_callbacks(){} // static builds refer the functions directly.
 #endif /*MDG_DYNAMIC_LIBRARY */
 
 void mdg_chat_client_exit() {
+  pktdump_close_file();
   exit(0);
 }
 
@@ -352,6 +354,20 @@ int main(int c, char**a) {
 
   mdg_chat_output_fprintf("Welcome to TDG-lib chat demo.\n");
   setup_callbacks();
+
+  if (c > 1) {
+    if (!strcmp(a[1], "--dump"))
+    {
+      if (c == 2) {
+        fprintf(stderr, "--dump option requires file name argument\n");
+        return 255;
+      }
+      pktdump_open_file(a[2]);
+      c -= 2;
+      a += 2;
+    }
+  }
+
   chatclient_parse_cmd_args(c, a);
   if (c == 3) {
     // Use TCP based IO instead of stdIO
