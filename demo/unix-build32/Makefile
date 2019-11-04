@@ -1,7 +1,8 @@
-SRC=../mdg_unix_main.c ../mdg_chat_client.c
-CFLAGS=-m32 -Wall -I../../include -DMDG_DYNAMIC_LIBRARY
-LDFLAGS=-L. -lmdglib -lm -lpthread -lrt
-SO_FILES=libmdglib.so
+BIN      := unix_main
+SRCDIR   := ..
+CFLAGS   := -m32 -Wall -I../../include -DMDG_DYNAMIC_LIBRARY
+LDFLAGS  := -L. -lmdglib -lm -lpthread -lrt
+SO_FILES := libmdglib.so
 
 include ../Makefile.common
 
