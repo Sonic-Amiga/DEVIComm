@@ -2,7 +2,7 @@ CC       := armv7a-linux-androideabi16-clang
 BIN      := android_main
 SRCDIR   := ..
 CFLAGS   := -Wall -I../../include -DMDG_DYNAMIC_LIBRARY -fPIE
-LDFLAGS  := -L. -lmdglib-java -lm
+LDFLAGS  := -L. -lmdglib-java -lm -Wl,-rpath=.
 SO_FILES := libmdglib-java.so
 PREFIX   := /data/DEVICom
 
