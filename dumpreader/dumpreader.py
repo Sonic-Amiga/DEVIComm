@@ -16,14 +16,18 @@ def DumpData(data, offset):
         print json.dumps(messages, indent=4, sort_keys=True, ensure_ascii=False, encoding='utf-8')
 
 if len(sys.argv) < 2:
-    print "Usage :" + sys.argv[0] + " <input file>"
+    print "Usage :" + sys.argv[0] + " <input file> [start offset]"
     exit(1)
 
 infile = open(sys.argv[1], "r") 
 data = ""
-# We assume that the first packet is VOCH payload, and it has 128 bytes of inner
-# crypto box, containing the key. Skip it over.
-offset = 128
+
+if len(sys.argv) > 2:
+    offset = sys.argv[2]
+else:
+    # We assume that the first packet is VOCH payload, and it has 128 bytes of inner
+    # crypto box, containing the key. Skip it over.
+    offset = 128
 
 for line in infile:
     line = line.strip()
