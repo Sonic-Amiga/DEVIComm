@@ -19,6 +19,13 @@ time on behalf of my own purely for evaluation and research purposes. No
 commercial interests are being (or will be) pursued. My contact email is
 pavel_fedin@mail.ru.
 
+## Acknowledgements
+
+The code and auxilary tools in this repository also use:
+
+- JSMN JSON parser by Serge Zaitsev: https://zserge.com/jsmn/
+- Python protobuf decoder: https://github.com/nevermoe/protobuf-decoder
+
 ## How to use
 
 1. Build and run the demo application.

@@ -3,3 +3,5 @@ DerivedData
 tmp
 chat_demo_private.key
 chat_demo_pairings.bin
+*.pyc
+
