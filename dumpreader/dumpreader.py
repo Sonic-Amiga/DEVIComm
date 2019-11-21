@@ -19,6 +19,9 @@ def DumpData(data, offset, decodeHeader):
                 print "Packet is too short, no header"
                 return
             msgsize = (ord(data[offset]) << 8) | ord(data[offset + 1])
+            if msgsize > size - 2:
+                print "Invalid payload size, not a protobuf"
+                return
             msgtype = ord(data[offset + 2])
             print "Data length " + str(msgsize) + " type " + str(msgtype)
             offset = offset + 3
