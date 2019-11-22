@@ -20,14 +20,17 @@ def DumpData(data, offset, decodeHeader):
                 return
             msgsize = (ord(data[offset]) << 8) | ord(data[offset + 1])
             if msgsize > size - 2:
-                print "Invalid payload size, not a protobuf"
+                print "Invalid payload size, no header"
                 return
             msgtype = ord(data[offset + 2])
             print "Data length " + str(msgsize) + " type " + str(msgtype)
             offset = offset + 3
         messages = {}
-        protobuf.ParseData(data, offset, size, messages)
-        print json.dumps(messages, indent=4, sort_keys=True, ensure_ascii=False, encoding='utf-8')
+        isPB = protobuf.ParseData(data, offset, size, messages)
+        if isPB:
+            print(json.dumps(messages, indent=4, sort_keys=True, ensure_ascii=False, encoding='utf-8'))
+        else:
+		    print("Not a protobuf: " + binascii.hexlify(data[offset:]))
 
 if len(sys.argv) < 2:
     print "Usage :" + sys.argv[0] + " <input file> [start offset]"
