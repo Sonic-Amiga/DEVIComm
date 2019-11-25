@@ -95,7 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;MDG_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;MDG_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tdg_lib.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>

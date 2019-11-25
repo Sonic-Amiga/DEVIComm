@@ -1089,7 +1089,20 @@ static int bootstrap_server_got_data(const unsigned char *data,
   return 0;
 }
 
+static int auto_pair = 1;
 
+static void auto_pair_handler(char *args_buf, unsigned int len)
+{
+  char *arg = args_buf;
+
+  if (!arg_decode_gotonext(&args_buf, &len)) {
+    if (strcmp(arg, "0") == 0 || stricmp(arg, "off") == 0)
+      auto_pair = 0;
+    else
+      auto_pair = 1;
+  }
+  mdg_chat_output_fprintf("auto-add-pairing: %s\n", auto_pair ? "enabled" : "disabled");
+}
 
 static void basic_help_handler(char *args_buf, unsigned int len);
 static void advanced_help_handler(char *args_buf, unsigned int len);
@@ -1159,6 +1172,9 @@ static const struct cmd advanced_commands[] = {
    "Download a file and verify checksum/signature",
    ota_demo_handler},
 #endif
+  {"/aap", "/auto-add-pairing",
+   "Enable or disable to automatically add pairings after OTP pairing",
+   auto_pair_handler },
   { 0, 0, 0, 0 }
 };
 
@@ -1428,8 +1444,19 @@ int mdgstorage_load_pairing(int pairings_index, uint8_t *peer_id)
 // Callbacks invoked by MDG lib.
 int mdgstorage_add_pairing(uint8_t *peer_id)
 {
-  Log("%s(", __FUNCTION__); Hexdump(peer_id, MDG_PEER_ID_SIZE); Log(") called\n");
-  return add_pairing(peer_id, "Paired by MDG");
+  char buf[AS_HEX(MDG_PEER_ID_SIZE)];
+
+  hex_encode_bytes(peer_id, buf, MDG_PEER_ID_SIZE);
+  if (auto_pair)
+  {
+    Log("%s(%s) called\n", __FUNCTION__, buf);
+    return add_pairing(peer_id, "Paired by MDG");
+  }
+  else
+  {
+    mdg_chat_output_fprintf("IGNORED adding peer ID %s\n", buf);
+    return 0;
+  }
 }
 
 // Callbacks invoked by MDG lib.
