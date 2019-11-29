@@ -24,6 +24,7 @@
 #define MDGEXT_NO_INVOKE_SERVICE
 #define MDGEXT_NO_SECURE_LOG
 #define MDGEXT_NO_SERVER_PUSH
+#define strcasecmp stricmp
 #else
 #ifndef __ANDROID__
 // Include demo of file downloading - links mdgext_filedown into the binary too.
@@ -1096,7 +1097,7 @@ static void auto_pair_handler(char *args_buf, unsigned int len)
   char *arg = args_buf;
 
   if (!arg_decode_gotonext(&args_buf, &len)) {
-    if (strcmp(arg, "0") == 0 || stricmp(arg, "off") == 0)
+    if (strcmp(arg, "0") == 0 || strcasecmp(arg, "off") == 0)
       auto_pair = 0;
     else
       auto_pair = 1;
