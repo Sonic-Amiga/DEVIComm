@@ -178,31 +178,39 @@ static int arg_decode_gotonext(char **args_buf, unsigned int *lenp)
   return 0;
 }
 
+static int arg_decode_device_id_hex_internal(char *dev_id_arg, uint8_t *target)
+{
+    char *first_space = strstr(dev_id_arg, " ");
+    int arg_len;
+
+    if (first_space != 0) {
+        arg_len = first_space - dev_id_arg;
+    } else {
+        arg_len = strlen(dev_id_arg);
+    }
+    if (arg_len != MDG_PEER_ID_SIZE * 2) {
+        return 3;
+    }
+    if (hex_decode_bytes(dev_id_arg, target, MDG_PEER_ID_SIZE)) {
+        return 4;
+    }
+
+    return 0;
+}
+
 static int arg_decode_device_id_hex(char **args_buf, unsigned int *len, uint8_t *target)
 {
   char *dev_id_arg = *args_buf;
-  char *first_space = strstr(dev_id_arg, " ");
-  int arg_len;
+
   if (*len < MDG_PEER_ID_SIZE * 2) {
     return 2;
   }
   if (arg_decode_gotonext(args_buf, len)) {
     return 1;
   }
-  if (first_space != 0) {
-    arg_len = first_space - dev_id_arg;
-  } else {
-    arg_len = *args_buf - dev_id_arg;
-  }
-  if (arg_len != MDG_PEER_ID_SIZE * 2) {
-    return 3;
-  }
-  if (hex_decode_bytes(dev_id_arg, target, MDG_PEER_ID_SIZE)) {
-    return 4;
-  }
 
-  return 0;
-}
+  return arg_decode_device_id_hex_internal(dev_id_arg, target);
+ }
 
 static void quit_handler(char *args_buf, unsigned int len)
 {
@@ -1018,14 +1026,29 @@ static void pair_local_handler(char *args_buf, unsigned int len)
 static void place_call_local_handler(char *args_buf, unsigned int len)
 {
   int s;
+  char *dev_id_arg;
   char* peer_ip;
   char *protocol_arg;
   uint8_t device_id[MDG_PEER_ID_SIZE];
   uint32_t connection_id;
   int port;
+  uint8_t *device_id_for_call = device_id;
 
-  if (arg_parse_device_public_key(&args_buf, &len, device_id) != 0) {
-    return;
+  dev_id_arg = args_buf;
+  if (arg_decode_gotonext(&args_buf, &len)) {
+      mdg_chat_output_fprintf("place call local: Missing required arg, deviceId.\n");
+      return;
+  }
+
+  if (!strcmp(dev_id_arg, "0"))
+  {
+      memset(device_id, 0, sizeof(device_id));
+      device_id_for_call = NULL;
+  }
+  else if (arg_decode_device_id_hex_internal(dev_id_arg, device_id))
+  {
+      mdg_chat_output_fprintf("place call local: Malformed arg, deviceId.\n");
+      return;
   }
 
   peer_ip = args_buf;
@@ -1049,10 +1072,10 @@ static void place_call_local_handler(char *args_buf, unsigned int len)
       return;
     }
   } else {
-    protocol_arg = "chat-client";
+    protocol_arg = "wifi-bootstrap"; /* DeviSmart app uses this when connecting locally */
   }
 
-  s = mdg_place_call_local(device_id, protocol_arg, peer_ip, (uint16_t) port,
+  s = mdg_place_call_local(device_id_for_call, protocol_arg, peer_ip, (uint16_t) port,
                            &connection_id, pcr_timeout);
   if (s == 0) {
     mdg_chat_output_fprintf("Place call started, got connection_id=%d\n", connection_id);
